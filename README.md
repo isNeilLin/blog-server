@@ -27,6 +27,20 @@ method: GET
 path:   /get_publish
 ```
 
+**getPrivatePost**
+
+```
+method: GET
+path:   /get_private
+```
+
+**getPostById**
+
+```
+method: GET
+path:   /post?id=1
+```
+
 **Insert**
 
 ```

@@ -3,8 +3,8 @@ package models
 import (
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
-	//"blog/conf"
-	"strconv"
+	"blog/utils"
+	"blog/conf"
 )
 
 type Post struct {
@@ -33,7 +33,8 @@ func (Tag)TableName() string {
 var DB *gorm.DB
 
 func InitDB() *gorm.DB {
-	db,err := gorm.Open("mysql","root:123456@/test?charset=utf8&parseTime=True&loc=Local")
+	utils.InitConfig()
+	db,err := gorm.Open(conf.LocalDB.Name,conf.LocalDB.Option)
 	if err != nil {
 		panic(err.Error())
 	}
@@ -79,13 +80,8 @@ func getPostList(publish bool) ([]*Post, error) {
 	return posts, err
 }
 
-func GetPostById(id string) (*Post, error){
-	pid, err := strconv.ParseUint(id, 10, 64)
-
-	if err != nil {
-		return nil, err
-	}
+func (p *Post)GetPostById() (*Post, error){
 	var post Post
-	err = DB.First(&post, "id = ?", uint(pid)).Error
+	err := DB.First(&post, "id = ?", p.ID).Error
 	return &post, err
 }

@@ -1,9 +1,11 @@
 package conf
 
-type mysql struct {
-	username	string
-	password	string
-	port		string
-}
+var (
+	Enviroment		string
+	LocalDB 		= new(localDB)
+)
 
-var MySql mysql = mysql{"root","password","3306"}
+type localDB struct{
+	Name 	string
+	Option	string
+}

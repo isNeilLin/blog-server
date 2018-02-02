@@ -1,0 +1,4 @@
+{
+  "name":   "mysql",
+  "option": "root:lin7783@/blog?charset=utf8&parseTime=True&loc=Local"
+}

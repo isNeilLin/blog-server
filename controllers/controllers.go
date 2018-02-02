@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"blog/models"
 	"net/http"
+	"blog/utils"
 	"strconv"
 )
 
@@ -34,6 +35,33 @@ func Post(c *gin.Context) {
 			"code":		0,
 			"message":	"insert successed!",
 			"post":		post,
+		})
+	}
+}
+
+func GetPostById(c *gin.Context) {
+	id 		:= c.Query("id")
+	pid,err := utils.StringToUint(id)
+	if err != nil {
+		c.JSON(http.StatusOK, gin.H{
+			"code":		1,
+			"message":	err.Error(),
+		})
+	}
+	post	:= &models.Post{}
+	post.ID  = pid
+	post,err =post.GetPostById()
+
+	if err != nil {
+		c.JSON(http.StatusOK, gin.H{
+			"code":		1,
+			"message":	err.Error(),
+		})
+	} else {
+		c.JSON(http.StatusOK, gin.H{
+			"code"		: 0,
+			"message" 	: "query successed",
+			"post"		: post,
 		})
 	}
 }
@@ -70,6 +98,22 @@ func GetPublish(c *gin.Context) {
 	}
 }
 
+func GetPrivate(c *gin.Context) {
+	posts, err := models.GetPrivatePost()
+	if err != nil {
+		c.JSON(http.StatusOK, gin.H{
+			"code":		1,
+			"message":	err.Error(),
+		})
+	} else {
+		c.JSON(http.StatusOK, gin.H{
+			"code":		0,
+			"message":	"get published list successed",
+			"posts":	posts,
+		})
+	}
+}
+
 func Update(c *gin.Context) {
 	id			:= c.PostForm("id")
 	title 		:= c.PostForm("title")
@@ -78,7 +122,7 @@ func Update(c *gin.Context) {
 	str_publish := c.PostForm("publish")
 	publish, _ 	:= strconv.ParseBool(str_publish)
 
-	pid, err 	:= strconv.ParseUint(id, 10, 64)
+	pid,err 	:= utils.StringToUint(id)
 
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
@@ -94,7 +138,7 @@ func Update(c *gin.Context) {
 		Summary:	summary,
 		Publish:	publish,
 	}
-	post.ID = uint(pid)
+	post.ID = pid
 	err = post.Update()
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
@@ -113,7 +157,7 @@ func Update(c *gin.Context) {
 
 func Delete(c *gin.Context) {
 	id 		:= c.PostForm("id")
-	pid,err	:= strconv.ParseUint(id, 10, 64)
+	pid,err	:= utils.StringToUint(id)
 
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
@@ -125,7 +169,7 @@ func Delete(c *gin.Context) {
 
 	post 	:= &models.Post{}
 
-	post.ID	= uint(pid)
+	post.ID	= pid
 
 	err 	= post.Delete()
 

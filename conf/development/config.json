@@ -1,0 +1,4 @@
+{
+    "name":   "mysql",
+    "option": "root:123456@/test?charset=utf8&parseTime=True&loc=Local"
+}
