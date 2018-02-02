@@ -4,7 +4,8 @@ import (
 	"io"
 	"os"
 	"github.com/gin-gonic/gin"
-	Controller "blog/controllers"
+	"blog/models"
+	"blog/controllers"
 )
 
 func main() {
@@ -12,12 +13,14 @@ func main() {
 	f, _ := os.Create("server.log")
 	gin.DefaultWriter = io.MultiWriter(f)
 	r := gin.Default()
-	r.GET("/ping", Controller.Ping)
-	r.GET("/user/:name/*action", Controller.User)
-	r.GET("/welcome", Controller.Welcome)
-	r.POST("/form_post", Controller.FormPost)
-	r.POST("/upload", Controller.Upload)
+	db := models.InitDB()
 
+	defer db.Close()
+	r.GET("/get_all",controllers.GetAll)
+	r.GET("/get_publish",controllers.GetPublish)
+	r.POST("/create", controllers.Post)
+	r.POST("/update",controllers.Update)
+	r.POST("/delete",controllers.Delete)
 	r.Run()
 }
 
