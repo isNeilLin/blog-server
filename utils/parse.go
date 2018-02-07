@@ -1,6 +1,8 @@
 package utils
 
-import "strconv"
+import (
+	"strconv"
+)
 
 func StringToUint(s string) (uint, error){
 	pid, err := strconv.ParseUint(s, 10, 64)
