@@ -12,6 +12,7 @@ func Post(c *gin.Context) {
 	title 		:= c.PostForm("title")
 	content 	:= c.PostForm("content")
 	summary 	:= c.PostForm("summary")
+	tags		:= c.PostForm("tags")
 	str_publish := c.PostForm("publish")
 	publish, _ 	:= strconv.ParseBool(str_publish)
 
@@ -31,6 +32,7 @@ func Post(c *gin.Context) {
 			"post":		post,
 		})
 	} else {
+		models.CreateTags(tags, post)
 		c.JSON(http.StatusOK, gin.H{
 			"code":		0,
 			"message":	"insert successed!",
@@ -117,10 +119,12 @@ func GetPrivate(c *gin.Context) {
 func Update(c *gin.Context) {
 	id			:= c.PostForm("id")
 	title 		:= c.PostForm("title")
+	tags		:= c.PostForm("tags")
 	content 	:= c.PostForm("content")
 	summary 	:= c.PostForm("summary")
 	str_publish := c.PostForm("publish")
 	publish, _ 	:= strconv.ParseBool(str_publish)
+
 
 	pid,err 	:= utils.StringToUint(id)
 
@@ -144,9 +148,22 @@ func Update(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
 			"code":		1,
 			"message":	err.Error(),
-			"post":	post,
 		})
 	} else {
+		err = models.DeleteTagsFromPostId(pid)
+		if err != nil {
+			c.JSON(http.StatusOK, gin.H{
+				"code":		1,
+				"message":	err.Error(),
+			})
+		}
+		err = models.CreateTags(tags,post)
+		if err != nil {
+			c.JSON(http.StatusOK, gin.H{
+				"code":		1,
+				"message":	err.Error(),
+			})
+		}
 		c.JSON(http.StatusOK, gin.H{
 			"code":		0,
 			"message":	"update successed",
@@ -186,4 +203,130 @@ func Delete(c *gin.Context) {
 		})
 	}
 
+}
+
+func GetTags(c *gin.Context)  {
+	tags, err := models.GetTags()
+	if err != nil {
+		c.JSON(http.StatusOK, gin.H{
+			"code":		1,
+			"message":	err.Error(),
+		})
+	} else {
+		c.JSON(http.StatusOK, gin.H{
+			"code":		0,
+			"message":	"get list successed",
+			"tags":	tags,
+		})
+	}
+}
+
+func AddTag(c *gin.Context)  {
+	name 	:= c.PostForm("name")
+	color 	:= c.PostForm("color")
+	tag 	:= &models.Tag{
+		Name: 	name,
+		Color:	color,
+	}
+	err 	:= tag.Insert()
+	if err != nil {
+		c.JSON(http.StatusOK, gin.H{
+			"code":		1,
+			"message":	err.Error(),
+		})
+	} else {
+		c.JSON(http.StatusOK, gin.H{
+			"code":		0,
+			"message":	"insert successed!",
+			"tag":		tag,
+		})
+	}
+}
+
+func UpdateTag(c *gin.Context)  {
+	name 	:= c.PostForm("name")
+	color 	:= c.PostForm("color")
+	id 		:= c.PostForm("id")
+	pid,err := utils.StringToUint(id)
+	if err != nil {
+		c.JSON(http.StatusOK, gin.H{
+			"code":		1,
+			"message":	err.Error(),
+		})
+		return
+	}
+
+	tag 	:= &models.Tag{
+		Name: 	name,
+		Color:	color,
+	}
+	tag.ID 	= pid
+	err    	= tag.Update()
+	if err != nil {
+		c.JSON(http.StatusOK, gin.H{
+			"code":		1,
+			"message":	err.Error(),
+		})
+	} else {
+		c.JSON(http.StatusOK, gin.H{
+			"code":		0,
+			"message":	"update successed",
+			"tag":	tag,
+		})
+	}
+}
+
+func DeleteTag(c *gin.Context)  {
+	id 		:= c.PostForm("id")
+	pid,err	:= utils.StringToUint(id)
+
+	if err != nil {
+		c.JSON(http.StatusOK, gin.H{
+			"code":		1,
+			"message":	err.Error(),
+		})
+		return
+	}
+
+	tag 	:= &models.Tag{}
+	tag.ID   = pid
+	err 	 = tag.Delete()
+	if err != nil {
+		c.JSON(http.StatusOK, gin.H{
+			"code":		1,
+			"message":	err.Error(),
+		})
+	} else {
+		c.JSON(http.StatusOK, gin.H{
+			"code":		0,
+			"message":	"delete successed",
+			"tag":	tag,
+		})
+	}
+}
+
+func GetPostByTag(c *gin.Context)  {
+	id		:= c.Query("tag_id")
+	tid,err	:= utils.StringToUint(id)
+	if err != nil {
+		c.JSON(http.StatusOK, gin.H{
+			"code":		1,
+			"message":	err.Error(),
+		})
+		return
+	}
+
+	posts, err := models.GetPostsByTag(tid)
+	if err != nil {
+		c.JSON(http.StatusOK, gin.H{
+			"code":		1,
+			"message":	err.Error(),
+		})
+	} else {
+		c.JSON(http.StatusOK, gin.H{
+			"code":		0,
+			"message":	"get post successed",
+			"posts":	posts,
+		})
+	}
 }
